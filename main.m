@@ -108,7 +108,7 @@ if (clientID>-1)
         data = [];
         dat = 1;
         disp(' ')
-        disp('[one grid cell size in floor is 1x1 m]')
+        disp('[one grid cell size on floor is 1x1 m]')
         goal(1) = input('x coordinate(0~10m): ');
         goal(2) = input('y coordinate(0~10m): ');
         xg = goal(1); yg = goal(2);
@@ -329,9 +329,7 @@ if (clientID>-1)
                 
                 if avoid ==1
                     disp('obs detect');
-                    obss = [];
-                    tmp_map = MAP;
-                    tmp_obs_map = obs_MAP;
+                    
                     [~,posc]=(vrep.simxGetObjectPosition(clientID,pioneer,-1,vrep.simx_opmode_blocking  )); % -1 for absolute position
                     posc=double(posc);
                     Px = posc(1);
@@ -339,63 +337,18 @@ if (clientID>-1)
                     [~,angc]=(vrep.simxGetObjectOrientation(clientID,pioneer,-1,vrep.simx_opmode_blocking  )); % -1 for absolute position
                     angc=double(angc);
                     theta = angc(3);
-                    ROT(1,1) = cos(theta);
-                    ROT(1,2) = -1*sin(theta);
-                    ROT(2,1) = sin(theta);
-                    ROT(2,2) = cos(theta);
-                    rotd = ROT*obs_points';
-                    iner = rotd + [Px;Py];
-                    for obs_i = 1:obs_count
-                        tmp_map(floor(iner(1,obs_i)*10),floor(iner(2,obs_i)*10)) = -1;
-                        tmp_obs_map(floor(iner(1,obs_i)*10),floor(iner(2,obs_i)*10)) = -1;
-                        obs = [floor(iner(1,obs_i)*10), floor(iner(2,obs_i)*10)];
-                        obss = [obss;obs];
-                    end
                     
-                    figure(4)
-                    for map_x = 1:100
-                        for map_y = 1:100
-                            if tmp_map(map_x, map_y) == -1
-                                plot(map_x, map_y,'s');
-                                hold on;
-                            end
-                        end
-                    end
-                    axis([0 100 0 100]);
-                    pbaspect([1 1 1]);
-                    hold on;
-                    grid on;
-                    
-                    
-                    loc_traj_2 = [];
-                    loc_s = [floor(Px*10), floor(Py*10)];
-                    loc_goal = [floor(xn*10), floor(yn*10)];
-                    loc_traj_2 = A_Star(loc_s, loc_goal, tmp_map, tmp_obs_map, rob_siz);
-                    path_len = size(loc_traj_2,1);
+                    loc_opt_traj = local_path_update(Px, Py, xn, yn, theta, MAP, obs_MAP, rob_siz, obs_points, obs_count);
+                    loc_opt_len = size(loc_opt_traj,1);
                     
                     no_path = 0;
-                    if path_len==0
+                    if loc_opt_len == 0
                         no_path=1;
                         d_goal = 0;
                         disp('no possible path')
                         break;
                     end
-                    loc_traj_len = size(loc_traj_2,1);
-                    loc_traj = [];
-                    for loc_i=1:loc_traj_len
-                        loc_traj(loc_i,:) = loc_traj_2(loc_traj_len+1-loc_i,:);
-                    end
-                    %{
-                    for loc_i=1:loc_traj_len
-                        loc_xd_2(loc_i) = loc_traj(loc_i,1)/10;
-                        loc_yd_2(loc_i) = loc_traj(loc_i,2)/10;
-                    end
-                    %}
-                    loc_opt_traj= [];
-                    loc_opt_traj = optimization(loc_traj, tmp_obs_map, rob_siz);
-                    %loc_opt_traj = loc_traj;
-
-                    loc_opt_len = size(loc_opt_traj,1);
+                    
                     loc_xd = [];
                     loc_yd = [];
                     for loc_i=1:loc_opt_len
@@ -413,11 +366,11 @@ if (clientID>-1)
                         yd(i+update-2) = loc_yd(update);
                     end
                     tmp_traj_len = size(tmp_traj_x,2);
-
                     for update = 1:tmp_traj_len
                         xd(i+update-2+loc_opt_len) = tmp_traj_x(update);
                         yd(i+update-2+loc_opt_len) = tmp_traj_y(update);
                     end
+                    
                     xn = xd(i);
                     yn = yd(i);
                     opt_len = size(xd,2);
@@ -550,8 +503,8 @@ p = plot([60 62], [20 20], '-r');
 p = plot([60 62], [30 30], '-r');
 p = plot([60 62], [70 70], '-r');
 p = plot([60 62], [80 80], '-r');
-ylabel('y (m)','Interpreter','latex')
-xlabel('x (m)','Interpreter','latex')
+ylabel('y (cm)','Interpreter','latex')
+xlabel('x (cm)','Interpreter','latex')
 axis([0 100 0 100])
 pbaspect([ 1 1 1 ]);
 

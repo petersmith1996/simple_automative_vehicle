@@ -73,9 +73,9 @@ function traj = A_Star(pos, goal , MAP, obs_MAP, rob_siz)
     %goal_distance=distance(xNode,yNode,xTarget,yTarget);
     goal_distance=manhatten(xNode,yNode,xTarget,yTarget);
 
-    coll = collcheck(obs_MAP, xNode, yNode, rob_siz);
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %coll = 1;
+    %Improved to detect collisions with obstacles in consideration of the volume of the mobile robot.
+    coll = collcheck(obs_MAP, xNode, yNode, rob_siz);
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %fprintf(fp, 'start - x: %2.1f, y: %2.1f, coll: %d\n', xNode, yNode, coll); 
     if coll > -1
