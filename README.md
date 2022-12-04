@@ -1,6 +1,6 @@
-# simple_automative_vehicle
-path planning with A* alg. , path optimization, static obstacle avoidance with kinect sensor in CoppeliaSim
+# A simple self-driving mobile robot simulation
 
+
+# 1. 참여 인원
 ___
-
-# H1 Subject
+## * 개인 프로젝트
